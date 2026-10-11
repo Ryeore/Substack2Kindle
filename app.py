@@ -72,7 +72,9 @@ def extract_article(html, url):
     if body is None:
         raise ValueError("Could not find article content on this page.")
 
-    for embed in body.select('[data-component-name="DigestPostEmbed"]'):
+    for embed in body.select(
+        '[data-component-name="DigestPostEmbed"], .subscription-widget-wrap'
+    ):
         embed.decompose()
 
     post_title = soup.select_one(".post-title")

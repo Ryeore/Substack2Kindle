@@ -79,6 +79,9 @@ class ConverterTests(unittest.TestCase):
         <div data-component-name="DigestPostEmbed">
           <p>Another article embedded here</p><a href="/p/another">Read it</a>
         </div>
+        <div class="subscription-widget-wrap">
+          <p>Subscribe to keep reading</p><a href="/subscribe">Subscribe</a>
+        </div>
         <p>More actual article content.</p>
         </div></body></html>
         """
@@ -88,6 +91,8 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(title, "Article")
         self.assertNotIn("Another article embedded here", body.get_text())
         self.assertNotIn("Read it", body.get_text())
+        self.assertNotIn("Subscribe to keep reading", body.get_text())
+        self.assertNotIn("Subscribe", body.get_text())
         self.assertIn("More actual article content.", body.get_text())
 
     def test_slugify_returns_safe_nonempty_filename(self):
