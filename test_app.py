@@ -4,9 +4,11 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import Mock
+from unittest.mock import patch
 
 from bs4 import BeautifulSoup
 
+import web_app
 from app import (
     download_images,
     extract_article,
@@ -16,7 +18,7 @@ from app import (
     validate_url,
     write_clean_html,
 )
-from web_app import render_page, resolve_output_file, validate_article_urls
+from web_app import open_browser, render_page, resolve_output_file, validate_article_urls
 
 
 class ConverterTests(unittest.TestCase):
@@ -75,6 +77,16 @@ class ConverterTests(unittest.TestCase):
         )
         self.assertNotIn("<script>", page)
         self.assertIn("&lt;script&gt;", page)
+
+    @patch("web_app.threading.Timer")
+    def test_web_app_can_schedule_opening_browser(self, timer):
+        open_browser(8123)
+        timer.assert_called_once_with(
+            1,
+            web_app.webbrowser.open,
+            args=("http://127.0.0.1:8123/",),
+        )
+        timer.return_value.start.assert_called_once()
 
     def test_extract_article_preserves_images_and_removes_scripts(self):
         html = """

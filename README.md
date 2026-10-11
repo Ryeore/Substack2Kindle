@@ -85,6 +85,12 @@ article URLs, one per line, then select whether to email the EPUBs. The page
 provides links to review each cleaned HTML file and download its EPUB. Use
 `python web_app.py --port 8080` to select another local port.
 
+On Windows, double-click `Start Substack2Kindle.bat` to create the Python
+environment, install dependencies on first launch, and open the webpage
+automatically. The first launch creates `.env` from `.env.example`; fill in the
+Kindle and Gmail settings in Notepad before continuing. Leave the console
+window open while using the app, and press Ctrl+C there to stop it.
+
 The web app intentionally listens only on `127.0.0.1` and accepts article
 URLs hosted on `substack.com`. Do not expose it directly to your LAN or the
 public internet; it has no user login. For remote access, put it behind an

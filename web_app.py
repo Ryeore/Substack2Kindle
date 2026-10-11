@@ -4,6 +4,8 @@ import html
 import io
 import mimetypes
 import re
+import threading
+import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
@@ -97,6 +99,14 @@ label{{display:block;margin-top:.75rem}}
         urls=html.escape(urls),
         results="".join(cards),
     )
+
+
+def open_browser(port):
+    threading.Timer(
+        1,
+        webbrowser.open,
+        args=("http://127.0.0.1:{}/".format(port),),
+    ).start()
 
 
 class ConverterHandler(BaseHTTPRequestHandler):
@@ -212,12 +222,15 @@ def main(argv=None):
     load_env()
     parser = argparse.ArgumentParser(description="Run the local Substack2Kindle web app.")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--open-browser", action="store_true")
     args = parser.parse_args(argv)
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     server = HTTPServer(("127.0.0.1", args.port), ConverterHandler)
     print("Open http://127.0.0.1:{}/ in your browser. Press Ctrl+C to stop.".format(args.port))
+    if args.open_browser:
+        open_browser(args.port)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
