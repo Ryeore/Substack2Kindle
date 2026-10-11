@@ -74,31 +74,26 @@ unavailable images are skipped and reported.
 
 ## Run the desktop app
 
-On Windows, double-click `Start Substack2Kindle.bat`. It opens a desktop window
-where you can paste up to five Substack article URLs and choose whether to
-email the EPUBs to your Kindle. Select **Convert articles** to start, and use
-**Open output folder** to find the HTML and EPUB files. Keep the console
-window open while converting; close it to stop the app.
+On Windows, run `dist\Substack2Kindle.exe`. It opens a desktop window where
+you can paste up to five Substack article URLs and choose whether to email the
+EPUBs to your Kindle. Select **Convert articles** to start, and use **Open
+output folder** to find the HTML and EPUB files.
 
-The launcher uses the included Python environment when needed. To build a
-standalone executable that does not require Python on the target computer,
-double-click `Build Substack2Kindle EXE.bat`. After it finishes,
-`dist\Substack2Kindle.exe` is the app. The launcher automatically uses that
-executable when it exists. The executable keeps `.env` and generated files in
-the `dist` folder.
-
-You can also download the ready-to-run Windows executable from the project's
+Download the ready-to-run x64 Windows executable from the project's
 [latest GitHub release](https://github.com/Ryeore/Substack2Kindle/releases/latest).
-It is a standalone x64 Windows app; Python does not need to be installed.
+No Python installation is needed to run it. On first launch, `.env` is created
+and opened in Notepad; add your Kindle address and Gmail app password to enable
+email delivery. The executable saves settings and converted files beside
+itself.
 
-On first launch, `.env` is created and opened in Notepad. Add the Kindle
-address, Gmail app password, and sender address to enable Kindle delivery;
-restart the app after editing settings.
+To build the executable from source, install Python 3.10 or newer and run:
 
-To use only the standalone app, copy `dist\Substack2Kindle.exe` and
-`dist\.env.example` to a Windows computer. No Python installation is needed.
-The executable creates its own `.env` beside it on first launch and saves
-converted files to an `output` folder beside the executable.
+```powershell
+python -m pip install -r requirements-build.txt
+python -m PyInstaller --noconfirm --clean --onefile --windowed --name Substack2Kindle --add-data ".env.example;." desktop_app.py
+```
+
+The standalone executable will be created at `dist\Substack2Kindle.exe`.
 
 ## Check the output
 
