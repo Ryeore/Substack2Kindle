@@ -72,6 +72,25 @@ The HTML contains the article title and body, while excluding embedded
 Supported downloaded image formats are JPEG, PNG, and GIF; unsupported or
 unavailable images are skipped and reported.
 
+## Run the self-hosted webpage
+
+Start the local web app:
+
+```powershell
+python web_app.py
+```
+
+Open <http://127.0.0.1:8000/> in your browser. Paste up to five Substack
+article URLs, one per line, then select whether to email the EPUBs. The page
+provides links to review each cleaned HTML file and download its EPUB. Use
+`python web_app.py --port 8080` to select another local port.
+
+The web app intentionally listens only on `127.0.0.1` and accepts article
+URLs hosted on `substack.com`. Do not expose it directly to your LAN or the
+public internet; it has no user login. For remote access, put it behind an
+authenticated reverse proxy and add deployment-specific request protections.
+Only one conversion request runs at a time.
+
 ## Check the output
 
 Open the generated HTML in a browser to review the extracted article before
