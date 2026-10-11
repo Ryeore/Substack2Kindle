@@ -100,9 +100,6 @@ To use only the standalone app, copy `dist\Substack2Kindle.exe` and
 The executable creates its own `.env` beside it on first launch and saves
 converted files to an `output` folder beside the executable.
 
-The older local web interface is still available with
-`python web_app.py`, but it is optional and not used by the desktop launcher.
-
 ## Check the output
 
 Open the generated HTML in a browser to review the extracted article before

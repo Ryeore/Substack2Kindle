@@ -4,11 +4,9 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import Mock
-from unittest.mock import patch
 
 from bs4 import BeautifulSoup
 
-import web_app
 from app import (
     download_images,
     extract_article,
@@ -19,7 +17,6 @@ from app import (
     write_clean_html,
 )
 from desktop_app import parse_article_urls
-from web_app import open_browser, render_page, resolve_output_file, validate_article_urls
 
 
 class ConverterTests(unittest.TestCase):
@@ -29,32 +26,6 @@ class ConverterTests(unittest.TestCase):
         for url in ("http://example.com/article", "not-a-url"):
             with self.subTest(url=url), self.assertRaises(ValueError):
                 validate_url(url)
-
-    def test_web_form_only_accepts_https_substack_article_urls(self):
-        self.assertEqual(
-            validate_article_urls(
-                "https://example.substack.com/p/one\nhttps://substack.com/p/two"
-            ),
-            [
-                "https://example.substack.com/p/one",
-                "https://substack.com/p/two",
-            ],
-        )
-        for url in (
-            "http://example.substack.com/p/article",
-            "https://example.com/p/article",
-            "https://example.substack.com.evil.test/p/article",
-            "https://127.0.0.1/p/article",
-            "https://user@example.substack.com/p/article",
-            "https://example.substack.com:8443/p/article",
-        ):
-            with self.subTest(url=url), self.assertRaises(ValueError):
-                validate_article_urls(url)
-        with self.assertRaises(ValueError):
-            validate_article_urls("\n".join(
-                "https://example.substack.com/p/{}".format(index)
-                for index in range(6)
-            ))
 
     def test_desktop_app_accepts_only_substack_urls(self):
         self.assertEqual(
@@ -68,39 +39,6 @@ class ConverterTests(unittest.TestCase):
         ):
             with self.subTest(url=url), self.assertRaises(ValueError):
                 parse_article_urls(url)
-
-    def test_web_file_route_stays_inside_output_directory(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "article.epub").write_bytes(b"book")
-            self.assertEqual(
-                resolve_output_file("article.epub", root),
-                (root / "article.epub").resolve(),
-            )
-            for path in ("../secret.epub", "missing.exe"):
-                with self.subTest(path=path), self.assertRaises(ValueError):
-                    resolve_output_file(path, root)
-
-    def test_web_results_escape_untrusted_article_text(self):
-        page = render_page(
-            results=[{
-                "url": 'https://example.substack.com/<script>',
-                "success": False,
-                "log": "<script>alert(1)</script>",
-            }]
-        )
-        self.assertNotIn("<script>", page)
-        self.assertIn("&lt;script&gt;", page)
-
-    @patch("web_app.threading.Timer")
-    def test_web_app_can_schedule_opening_browser(self, timer):
-        open_browser(8123)
-        timer.assert_called_once_with(
-            1,
-            web_app.webbrowser.open,
-            args=("http://127.0.0.1:8123/",),
-        )
-        timer.return_value.start.assert_called_once()
 
     def test_extract_article_preserves_images_and_removes_scripts(self):
         html = """
