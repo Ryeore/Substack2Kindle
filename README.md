@@ -87,6 +87,10 @@ double-click `Build Substack2Kindle EXE.bat`. After it finishes,
 executable when it exists. The executable keeps `.env` and generated files in
 the `dist` folder.
 
+You can also download the ready-to-run Windows executable from the project's
+[latest GitHub release](https://github.com/Ryeore/Substack2Kindle/releases/latest).
+It is a standalone x64 Windows app; Python does not need to be installed.
+
 On first launch, `.env` is created and opened in Notepad. Add the Kindle
 address, Gmail app password, and sender address to enable Kindle delivery;
 restart the app after editing settings.
