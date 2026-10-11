@@ -1,7 +1,7 @@
 # Substack2Kindle
 
 <p align="center">
-  <img src="assets/S2Klogo.jpg" alt="Substack2Kindle logo" width="700">
+  <img src="assets/S2Klogo.png" alt="Substack2Kindle logo" width="700">
 </p>
 
 Convert Substack articles into Kindle-friendly EPUB files. The converter
