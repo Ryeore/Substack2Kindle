@@ -8,8 +8,8 @@ are stored beside the HTML and included in the EPUB.
 
 - Python 3.10 or newer for running from source or building the Windows executable
 - A network connection to the article and its images
-- For Kindle email: a Gmail account with an app password, and the Gmail sender
-  address approved in your Amazon **Personal Document Settings**
+- Amazon account access to [Send to Kindle](https://www.amazon.com/sendtokindle)
+- Optional: a Gmail app password if you prefer email delivery
 
 ## Install
 
@@ -19,10 +19,11 @@ In PowerShell, from the project folder:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-Copy-Item .env.example .env
 ```
 
-Open `.env` and configure email delivery:
+Amazon Send to Kindle is the default desktop delivery option and needs no
+Gmail credentials. For optional Gmail delivery, create `.env` from
+`.env.example` and configure:
 
 ```dotenv
 EMAIL_KINDLE=your_name@kindle.com
@@ -34,7 +35,8 @@ SMTP_SERVER=smtp.gmail.com
 
 `EMAIL_PASSWORD` must be a Google **app password**, not your regular Google
 account password. `EMAIL_SENDER` can be your full Gmail address or just the
-part before `@gmail.com`. Keep `.env` private; it is excluded from Git.
+part before `@gmail.com`. The sender must also be approved in Amazon **Personal
+Document Settings**. Keep `.env` private; it is excluded from Git.
 
 ## Convert articles
 
@@ -75,16 +77,19 @@ unavailable images are skipped and reported.
 ## Run the desktop app
 
 On Windows, run `dist\Substack2Kindle.exe`. It opens a desktop window where
-you can paste up to five Substack article URLs and choose whether to email the
-EPUBs to your Kindle. Select **Convert articles** to start, and use **Open
-output folder** to find the HTML and EPUB files.
+you can paste up to five Substack article URLs. **Send with Amazon** is
+selected by default. After conversion, the app opens Amazon Send to Kindle and
+the output folder; sign in to Amazon and upload the generated EPUB file(s).
+No Gmail app password or SMTP setup is needed. You can choose **Email through
+Gmail** instead if you have configured an app password. Use **Open output
+folder** to find the clean HTML and EPUB files.
 
 Download the ready-to-run x64 Windows executable from the project's
 [latest GitHub release](https://github.com/Ryeore/Substack2Kindle/releases/latest).
-No Python installation is needed to run it. On first launch, `.env` is created
-and opened in Notepad; add your Kindle address and Gmail app password to enable
-email delivery. The executable saves settings and converted files beside
-itself.
+No Python installation is needed to run it. For optional Gmail delivery, use
+**Open email settings** to create or edit `.env` with your Kindle address,
+Gmail app password, and sender. The executable saves settings and converted
+files beside itself.
 
 To build the executable from source, install Python 3.10 or newer and run:
 

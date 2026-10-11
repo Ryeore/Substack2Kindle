@@ -3,7 +3,7 @@ import unittest
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from bs4 import BeautifulSoup
 
@@ -16,7 +16,11 @@ from app import (
     validate_url,
     write_clean_html,
 )
-from desktop_app import parse_article_urls
+from desktop_app import (
+    AMAZON_SEND_TO_KINDLE_URL,
+    open_amazon_send_to_kindle,
+    parse_article_urls,
+)
 
 
 class ConverterTests(unittest.TestCase):
@@ -39,6 +43,18 @@ class ConverterTests(unittest.TestCase):
         ):
             with self.subTest(url=url), self.assertRaises(ValueError):
                 parse_article_urls(url)
+
+    @patch("desktop_app.webbrowser.open")
+    @patch("desktop_app.os.startfile", create=True)
+    def test_amazon_delivery_opens_upload_page_and_output_folder(
+        self, startfile, open_browser
+    ):
+        with tempfile.TemporaryDirectory() as directory:
+            output_dir = Path(directory) / "output"
+            open_amazon_send_to_kindle(output_dir)
+            open_browser.assert_called_once_with(AMAZON_SEND_TO_KINDLE_URL)
+            startfile.assert_called_once_with(str(output_dir))
+            self.assertTrue(output_dir.is_dir())
 
     def test_extract_article_preserves_images_and_removes_scripts(self):
         html = """
