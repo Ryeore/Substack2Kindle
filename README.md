@@ -6,7 +6,7 @@ are stored beside the HTML and included in the EPUB.
 
 ## Requirements
 
-- Python 3.10 or newer
+- Python 3.10 or newer for running from source or building the Windows executable
 - A network connection to the article and its images
 - For Kindle email: a Gmail account with an app password, and the Gmail sender
   address approved in your Amazon **Personal Document Settings**
@@ -72,30 +72,32 @@ The HTML contains the article title and body, while excluding embedded
 Supported downloaded image formats are JPEG, PNG, and GIF; unsupported or
 unavailable images are skipped and reported.
 
-## Run the self-hosted webpage
+## Run the desktop app
 
-Start the local web app:
+On Windows, double-click `Start Substack2Kindle.bat`. It opens a desktop window
+where you can paste up to five Substack article URLs and choose whether to
+email the EPUBs to your Kindle. Select **Convert articles** to start, and use
+**Open output folder** to find the HTML and EPUB files. Keep the console
+window open while converting; close it to stop the app.
 
-```powershell
-python web_app.py
-```
+The launcher uses the included Python environment when needed. To build a
+standalone executable that does not require Python on the target computer,
+double-click `Build Substack2Kindle EXE.bat`. After it finishes,
+`dist\Substack2Kindle.exe` is the app. The launcher automatically uses that
+executable when it exists. The executable keeps `.env` and generated files in
+the `dist` folder.
 
-Open <http://127.0.0.1:8000/> in your browser. Paste up to five Substack
-article URLs, one per line, then select whether to email the EPUBs. The page
-provides links to review each cleaned HTML file and download its EPUB. Use
-`python web_app.py --port 8080` to select another local port.
+On first launch, `.env` is created and opened in Notepad. Add the Kindle
+address, Gmail app password, and sender address to enable Kindle delivery;
+restart the app after editing settings.
 
-On Windows, double-click `Start Substack2Kindle.bat` to create the Python
-environment, install dependencies on first launch, and open the webpage
-automatically. The first launch creates `.env` from `.env.example`; fill in the
-Kindle and Gmail settings in Notepad before continuing. Leave the console
-window open while using the app, and press Ctrl+C there to stop it.
+To use only the standalone app, copy `dist\Substack2Kindle.exe` and
+`dist\.env.example` to a Windows computer. No Python installation is needed.
+The executable creates its own `.env` beside it on first launch and saves
+converted files to an `output` folder beside the executable.
 
-The web app intentionally listens only on `127.0.0.1` and accepts article
-URLs hosted on `substack.com`. Do not expose it directly to your LAN or the
-public internet; it has no user login. For remote access, put it behind an
-authenticated reverse proxy and add deployment-specific request protections.
-Only one conversion request runs at a time.
+The older local web interface is still available with
+`python web_app.py`, but it is optional and not used by the desktop launcher.
 
 ## Check the output
 

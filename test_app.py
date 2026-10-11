@@ -18,6 +18,7 @@ from app import (
     validate_url,
     write_clean_html,
 )
+from desktop_app import parse_article_urls
 from web_app import open_browser, render_page, resolve_output_file, validate_article_urls
 
 
@@ -54,6 +55,19 @@ class ConverterTests(unittest.TestCase):
                 "https://example.substack.com/p/{}".format(index)
                 for index in range(6)
             ))
+
+    def test_desktop_app_accepts_only_substack_urls(self):
+        self.assertEqual(
+            parse_article_urls("https://example.substack.com/p/article\n"),
+            ["https://example.substack.com/p/article"],
+        )
+        for url in (
+            "http://example.substack.com/p/article",
+            "https://example.com/article",
+            "https://example.substack.com.attacker.invalid/article",
+        ):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                parse_article_urls(url)
 
     def test_web_file_route_stays_inside_output_directory(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -2,6 +2,25 @@
 setlocal
 cd /d "%~dp0"
 
+if exist "dist\Substack2Kindle.exe" (
+    set "APP_DIR=%CD%\dist"
+    set "APP_EXE=%CD%\dist\Substack2Kindle.exe"
+) else (
+    set "APP_DIR=%CD%"
+)
+
+if not exist "%APP_DIR%\.env" (
+    copy ".env.example" "%APP_DIR%\.env" >nul
+    start "" notepad.exe "%APP_DIR%\.env"
+    echo Configure your Kindle and Gmail settings in the .env file, then come back here.
+    pause
+)
+
+if defined APP_EXE (
+    start "" "%APP_EXE%"
+    exit /b 0
+)
+
 if not exist ".venv\Scripts\python.exe" (
     where py >nul 2>&1
     if errorlevel 1 (
@@ -27,15 +46,8 @@ if not exist ".venv\.requirements-installed" (
     echo installed>".venv\.requirements-installed"
 )
 
-if not exist ".env" (
-    copy ".env.example" ".env" >nul
-    start "" notepad.exe "%CD%\.env"
-    echo Configure your Kindle and Gmail settings in the .env file, then come back here.
-    pause
-)
-
-".venv\Scripts\python.exe" web_app.py --open-browser
+".venv\Scripts\python.exe" desktop_app.py
 if errorlevel 1 (
-    echo The web app stopped with an error.
+    echo The desktop app stopped with an error.
     pause
 )
