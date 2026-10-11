@@ -102,6 +102,7 @@ def extract_article(html, url):
         if tag.name not in ALLOWED_TAGS:
             tag.unwrap()
             continue
+        is_image_caption = "image-caption" in tag.get("class", [])
         if tag.name == "a" and tag.get("href"):
             link = urlparse(urljoin(url, tag["href"]))
             if (
@@ -117,6 +118,9 @@ def extract_article(html, url):
                 continue
         allowed = {"a": {"href", "title"}, "img": {"src", "data-src", "alt", "title", "width", "height"}}
         keep = allowed.get(tag.name, set())
+        if is_image_caption:
+            tag["class"] = ["image-caption"]
+            keep = keep | {"class"}
         for attr in list(tag.attrs):
             if attr not in keep:
                 del tag.attrs[attr]
@@ -213,6 +217,8 @@ def write_clean_html(title, body, images, destination, source_url):
         'margin:2rem auto;padding:0 1rem;color:#222}}'
         'img{{max-width:100%;height:auto}}figure{{margin:1.5rem 0;text-align:center}}'
         'figcaption{{font-size:.9em;color:#555}}'
+        '.image-caption{{font-size:.82em;line-height:1.35;font-style:italic;'
+        'color:#555;text-align:center;margin:.4em 0 1.4em}}'
         'table{{border-collapse:collapse;max-width:100%}}'
         'td,th{{border:1px solid #888;padding:.35em}}'
         '</style></head><body></body></html>'.format(
@@ -279,6 +285,8 @@ def make_epub(html_path, destination):
             "body{font-family:serif;line-height:1.5;margin:5%;}"
             "h1,h2,h3{line-height:1.2;}img{max-width:100%;height:auto;}"
             "figure{margin:1em 0;text-align:center;}figcaption{font-size:.9em;}"
+            ".image-caption{font-size:.82em;line-height:1.35;font-style:italic;"
+            "color:#555;text-align:center;margin:.4em 0 1.4em;}"
             "table{border-collapse:collapse;width:100%;}td,th{padding:.3em;border:1px solid #888;}"
         ),
     ))
@@ -292,6 +300,18 @@ def make_epub(html_path, destination):
     book.add_item(epub.EpubNav())
     destination.parent.mkdir(parents=True, exist_ok=True)
     epub.write_epub(str(destination), book)
+
+
+def remove_intermediates(html_path, images):
+    asset_dir = html_path.with_name(html_path.stem + "-assets")
+    image_dir = asset_dir / "images"
+    for name, _, _ in images:
+        (asset_dir.joinpath(*Path(name).parts)).unlink(missing_ok=True)
+    if image_dir.exists():
+        image_dir.rmdir()
+    if asset_dir.exists():
+        asset_dir.rmdir()
+    html_path.unlink()
 
 
 def kindle_sender():
@@ -360,13 +380,16 @@ def process_url(url, output_dir, send_email):
             print("[OK] Download images: {} retained, {} skipped".format(
                 len(images), skipped_images
             ))
-        stage = "Save clean HTML"
+        stage = "Prepare temporary HTML"
         write_clean_html(title, body, images, html_path, response.url)
-        print("[OK] Save clean HTML: {}".format(html_path.resolve()))
+        print("[OK] Prepare temporary HTML")
         stage = "Convert HTML to EPUB"
         destination = output_dir / (basename + ".epub")
         make_epub(html_path, destination)
         print("[OK] Convert HTML to EPUB: {}".format(destination))
+        stage = "Remove temporary HTML and images"
+        remove_intermediates(html_path, images)
+        print("[OK] Remove temporary HTML and images")
         print("[OK] Save local copy: {}".format(destination.resolve()))
     except (requests.RequestException, ValueError, OSError) as error:
         print("[FAILED] {}: {}".format(stage, error))

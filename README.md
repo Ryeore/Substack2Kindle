@@ -1,8 +1,8 @@
 # Substack2Kindle
 
-Download Substack articles as clean HTML and Kindle-friendly EPUB files. The
-HTML is saved first so you can inspect it before or after conversion. Images
-are stored beside the HTML and included in the EPUB.
+Convert Substack articles into Kindle-friendly EPUB files. The converter
+creates temporary clean HTML and image files while building the EPUB, then
+removes those intermediates so the output folder keeps the EPUB.
 
 ## Requirements
 
@@ -58,21 +58,20 @@ Only create local files without sending email:
 python app.py --no-email https://example.substack.com/p/article
 ```
 
-By default, each article produces:
-
-- `output/<article title>.html` - cleaned article text and formatting for review
-- `output/<article title>-assets/` - downloaded article images
-- `output/<article title>.epub` - the ebook converted from the saved HTML
+Each article produces `output/<article title>.epub`. Clean HTML and downloaded
+images are temporary files used during conversion and are deleted after the
+EPUB is created successfully. If conversion fails, intermediates are kept to
+help diagnose the failure.
 
 Use `--output-dir PATH` to change the output folder. Filenames preserve Polish
 letters and spaces. Characters forbidden in Windows filenames (including `?`)
 are removed. If an output filename already belongs to another article, a short
 URL-based suffix is added.
 
-The HTML contains the article title and body, while excluding embedded
-`DigestPostEmbed` article cards. The EPUB opens directly to the article.
-Supported downloaded image formats are JPEG, PNG, and GIF; unsupported or
-unavailable images are skipped and reported.
+The EPUB contains the article title and body, excludes embedded
+`DigestPostEmbed` article cards, and opens directly to the article. Supported
+downloaded image formats are JPEG, PNG, and GIF; unsupported or unavailable
+images are skipped and reported.
 
 ## Run the desktop app
 
@@ -82,7 +81,7 @@ selected by default. After conversion, the app opens Amazon Send to Kindle and
 the output folder; sign in to Amazon and upload the generated EPUB file(s).
 No Gmail app password or SMTP setup is needed. You can choose **Email through
 Gmail** instead if you have configured an app password. Use **Open output
-folder** to find the clean HTML and EPUB files.
+folder** to find the EPUB files.
 
 Download the ready-to-run x64 Windows executable from the project's
 [latest GitHub release](https://github.com/Ryeore/Substack2Kindle/releases/latest).
@@ -102,9 +101,9 @@ The standalone executable will be created at `dist\Substack2Kindle.exe`.
 
 ## Check the output
 
-Open the generated HTML in a browser to review the extracted article before
-reading the EPUB. Processing reports each stage and returns a non-zero exit
-code if an article or Kindle email fails.
+Open the EPUB with an ebook reader to review the converted article. Processing
+reports each stage and returns a non-zero exit code if an article or Kindle
+email fails.
 
 Run the test suite with:
 

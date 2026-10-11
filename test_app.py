@@ -12,6 +12,7 @@ from app import (
     extract_article,
     filename_from_title,
     make_epub,
+    remove_intermediates,
     slugify,
     validate_url,
     write_clean_html,
@@ -62,6 +63,8 @@ class ConverterTests(unittest.TestCase):
         <body><article><h1>Test Article</h1><div class="body markup">
         <p>This article has enough text to be selected as the full article body.</p>
         <figure><img src="/chart.png" alt="Chart"><figcaption>Data</figcaption></figure>
+        <p class="image-caption">Chart caption.</p>
+        <p class="discarded-class">Ordinary paragraph.</p>
         <script>bad()</script><iframe src="https://example.com"></iframe>
         </div></article></body></html>
         """
@@ -71,6 +74,8 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(body.img["alt"], "Chart")
         self.assertIsNone(body.find("script"))
         self.assertIsNone(body.find("iframe"))
+        self.assertEqual(body.select_one(".image-caption").get("class"), ["image-caption"])
+        self.assertIsNone(body.select_one(".discarded-class"))
 
     def test_extract_article_prefers_article_title_over_publication_name(self):
         html = """
@@ -142,12 +147,15 @@ class ConverterTests(unittest.TestCase):
     def test_clean_html_is_saved_and_epub_converts_that_file(self):
         body = BeautifulSoup(
             '<p>Original content.</p>'
+            '<p class="image-caption">A chart caption.</p>'
             '<img src="article-assets/images/chart.png" alt="Chart">',
             "html.parser",
         )
         with tempfile.TemporaryDirectory() as directory:
             html_path = Path(directory) / "article.html"
             epub_path = Path(directory) / "article.epub"
+            unrelated_path = Path(directory) / "notes.txt"
+            unrelated_path.write_text("Keep this file.", encoding="utf-8")
             write_clean_html(
                 "<Test & Title>",
                 body,
@@ -197,6 +205,21 @@ class ConverterTests(unittest.TestCase):
                 self.assertIn("Reviewed content.", chapter)
                 self.assertNotIn("Original content.", chapter)
                 self.assertIn("EPUB/images/chart.png", archive.namelist())
+                self.assertIn(
+                    'class="image-caption"',
+                    chapter,
+                )
+                self.assertIn(
+                    b".image-caption",
+                    archive.read("EPUB/style.css"),
+                )
+            remove_intermediates(
+                html_path, [("images/chart.png", "image/png", b"image bytes")]
+            )
+            self.assertFalse(html_path.exists())
+            self.assertFalse((Path(directory) / "article-assets").exists())
+            self.assertTrue(epub_path.exists())
+            self.assertTrue(unrelated_path.exists())
 
     def test_make_epub_rejects_external_html_images(self):
         with tempfile.TemporaryDirectory() as directory:
